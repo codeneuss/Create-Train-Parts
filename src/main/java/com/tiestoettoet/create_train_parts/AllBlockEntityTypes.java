@@ -15,7 +15,7 @@ public class AllBlockEntityTypes {
 
     public static final BlockEntityEntry<TrainStepBlockEntity> TRAIN_STEP =
             REGISTRATE.blockEntity("train_step", TrainStepBlockEntity::new)
-                    .renderer(() -> TrainStepRenderer::new)
+                    .renderer(() -> context -> new TrainStepRenderer())
                     .validBlocks(AllBlocks.TRAIN_STEP_ANDESITE, AllBlocks.TRAIN_STEP_BRASS, AllBlocks.TRAIN_STEP_COPPER,
                                  AllBlocks.TRAIN_STEP_TRAIN)
                     .register();

@@ -1,19 +1,12 @@
 package com.tiestoettoet.create_train_parts.content.decoration.trainSlide;
 
-import java.lang.ref.WeakReference;
-import java.util.Map;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.content.contraptions.ContraptionWorld;
 import com.simibubi.create.content.contraptions.elevator.ElevatorColumn;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
-import com.tiestoettoet.create_train_parts.content.decoration.slidingWindow.SlidingWindowMovementBehaviour;
-import com.tiestoettoet.create_train_parts.content.decoration.trainSlide.TrainSlideBlock.ConnectedState;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
 import com.simibubi.create.content.contraptions.Contraption;
@@ -33,22 +26,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-import javax.annotation.Nullable;
-
-import static com.tiestoettoet.create_train_parts.content.decoration.trainSlide.TrainSlideBlock.CONNECTED;
 import static net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
 
 public class TrainSlideMovementBehaviour implements MovementBehaviour {
@@ -268,7 +254,6 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
                 context.state,
                 context.localPos,
                 world,
-                renderWorld,
                 animValue,
                 ms,
                 buffer,
