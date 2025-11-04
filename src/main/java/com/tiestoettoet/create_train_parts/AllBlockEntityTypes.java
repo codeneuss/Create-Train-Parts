@@ -1,7 +1,5 @@
 package com.tiestoettoet.create_train_parts;
 
-import com.simibubi.create.AllPartialModels;
-import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tiestoettoet.create_train_parts.content.decoration.slidingWindow.SlidingWindowBlockEntity;
 import com.tiestoettoet.create_train_parts.content.decoration.slidingWindow.SlidingWindowRenderer;
@@ -30,7 +28,7 @@ public class AllBlockEntityTypes {
 
     public static final BlockEntityEntry<SlidingWindowBlockEntity> SLIDING_WINDOW =
             REGISTRATE.blockEntity("sliding_window", SlidingWindowBlockEntity::new)
-                    .renderer(() -> SlidingWindowRenderer::new)
+                    .renderer(() -> context -> new SlidingWindowRenderer())
                     .validBlocks(AllBlocks.GLASS_SLIDING_WINDOW, AllBlocks.ANDESITE_SLIDING_WINDOW, AllBlocks.BRASS_SLIDING_WINDOW, AllBlocks.COPPER_SLIDING_WINDOW, AllBlocks.TRAIN_SLIDING_WINDOW)
                     .register();
 
