@@ -3,8 +3,16 @@ package com.tiestoettoet.create_train_parts.content.decoration.trainSlide;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.simibubi.create.content.contraptions.ContraptionWorld;
 import com.simibubi.create.content.contraptions.elevator.ElevatorColumn;
+import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
+import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
+import com.tiestoettoet.create_train_parts.content.decoration.slidingWindow.SlidingWindowMovementBehaviour;
 import com.tiestoettoet.create_train_parts.content.decoration.trainSlide.TrainSlideBlock.ConnectedState;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 
 import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
@@ -35,6 +43,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -45,14 +55,20 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
 
     public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
+    static class TrainSlideAnimationData {
+        LerpedFloat animation = LerpedFloat.linear();
+        DoorControlBehaviour doorControl;
+    }
 
     @Override
-    public boolean mustTickWhileDisabled() {return true;}
+    public boolean mustTickWhileDisabled() {
+        return true;
+    }
 
     @Override
     public void tick(MovementContext context) {
         StructureTemplate.StructureBlockInfo structureBlockInfo = context.contraption.getBlocks()
-            .get(context.localPos);
+                .get(context.localPos);
         if (structureBlockInfo == null)
             return;
         boolean open = TrainSlideBlockEntity.isOpen(structureBlockInfo.state());
@@ -60,18 +76,20 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
         if (!context.world.isClientSide())
             tickOpen(context, open);
 
-        BlockEntity be = context.contraption.getBlockEntityClientSide(context.localPos);
-        if(!(be instanceof TrainSlideBlockEntity sdbe))
-            return;
+        TrainSlideAnimationData ae;
+        if (!(context.temporaryData instanceof TrainSlideAnimationData)) {
+            context.temporaryData = ae = new TrainSlideAnimationData();
+        } else {
+            ae = (TrainSlideAnimationData) context.temporaryData;
+        }
 
-        boolean wasSettled = sdbe.animation.settled();
-        sdbe.animation.chase(open ? 1 : 0, .15f, Chaser.LINEAR);
-        sdbe.animation.tickChaser();
+        boolean wasSettled = ae.animation.settled();
+        ae.animation.chase(open ? 1 : 0, .15f, Chaser.LINEAR);
+        ae.animation.tickChaser();
 
-        if (!wasSettled && sdbe.animation.settled() && !open)
+        if (!wasSettled && ae.animation.settled() && !open)
             context.world.playLocalSound(context.position.x, context.position.y, context.position.z,
-                SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, .125f, 1, false);
-
+                    SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, .125f, 1, false);
 
 
     }
@@ -125,7 +143,6 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
     }
 
 
-
     protected boolean shouldUpdate(MovementContext context, boolean shouldOpen) {
         if (context.firstMovement && shouldOpen)
             return false;
@@ -150,13 +167,12 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
             return false;
         }
 
-        if (context.temporaryData instanceof WeakReference<?> wr && wr.get()instanceof DoorControlBehaviour dcb)
+        if (context.temporaryData instanceof TrainSlideAnimationData
+                && ((TrainSlideAnimationData) context.temporaryData).doorControl instanceof DoorControlBehaviour dcb)
             if (dcb.blockEntity != null && !dcb.blockEntity.isRemoved())
                 return shouldOpenAt(dcb, context);
 
-        context.temporaryData = null;
         DoorControlBehaviour doorControls = null;
-
 
         if (context.contraption.entity instanceof CarriageContraptionEntity cce)
             doorControls = getTrainStationSlideControl(cce, context);
@@ -167,7 +183,14 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
         if (doorControls == null)
             return false;
 
-        context.temporaryData = new WeakReference<>(doorControls);
+        TrainSlideAnimationData ae;
+        if (!(context.temporaryData instanceof TrainSlideAnimationData))
+            context.temporaryData = ae = new TrainSlideAnimationData();
+        else
+            ae = (TrainSlideAnimationData) context.temporaryData;
+
+        ae.doorControl = doorControls;
+
         return shouldOpenAt(doorControls, context);
     }
 
@@ -227,5 +250,30 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
         Vec3 directionVec = Vec3.atLowerCornerOf(originalFacing.getNormal());
         directionVec = context.rotation.apply(directionVec);
         return Direction.getNearest(directionVec.x, directionVec.y, directionVec.z);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void renderInContraption(MovementContext context, VirtualRenderWorld renderWorld, ContraptionMatrices matrices, MultiBufferSource buffer) {
+
+        if (!(context.temporaryData instanceof TrainSlideAnimationData ae))
+            return;
+
+
+        float animValue = ae.animation.getValue(AnimationTickHolder.getPartialTicks(context.world));
+        PoseStack ms = matrices.getModel();
+        int light = LevelRenderer.getLightColor(renderWorld, context.localPos);
+        Level world = context.contraption.getContraptionWorld();
+        TrainSlideRenderer.renderTrainSlide(
+                context.state,
+                context.localPos,
+                world,
+                renderWorld,
+                animValue,
+                ms,
+                buffer,
+                light,
+                matrices
+        );
     }
 }
