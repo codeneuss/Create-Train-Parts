@@ -8,6 +8,7 @@ import com.simibubi.create.content.contraptions.elevator.ElevatorContraption;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
 import com.simibubi.create.content.decoration.slidingDoor.DoorControl;
 import com.simibubi.create.content.decoration.slidingDoor.DoorControlBehaviour;
+import com.simibubi.create.content.decoration.slidingDoor.SlidingDoorBlockEntity;
 import com.simibubi.create.content.trains.entity.Carriage;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.station.GlobalStation;
