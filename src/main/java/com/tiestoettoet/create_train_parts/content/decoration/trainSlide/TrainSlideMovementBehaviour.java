@@ -60,8 +60,7 @@ public class TrainSlideMovementBehaviour implements MovementBehaviour {
         if (!context.world.isClientSide())
             tickOpen(context, open);
 
-        Map<BlockPos, BlockEntity> tes = context.contraption.presentBlockEntities;
-        if (!(tes.get(context.localPos) instanceof TrainSlideBlockEntity sdbe))
+        if (!(context.contraption.getBlockEntityClientSide(context.localPos) instanceof TrainSlideBlockEntity sdbe))
             return;
         boolean wasSettled = sdbe.animation.settled();
         sdbe.animation.chase(open ? 1 : 0, .15f, Chaser.LINEAR);
